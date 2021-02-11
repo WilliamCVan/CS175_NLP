@@ -1,0 +1,38 @@
+blis==0.7.4
+catalogue==2.0.1
+certifi==2020.12.5
+cffi @ file:///C:/ci/cffi_1606255208697/work
+chardet==4.0.0
+click==7.1.2
+cymem==2.0.5
+Cython==0.29.14
+fugashi==1.1.0
+future==0.18.2
+gensim==3.8.3
+idna==2.10
+Jinja2==2.11.3
+MarkupSafe==1.1.1
+mkl-service==2.3.0
+murmurhash==1.0.5
+numpy @ file:///D:/bld/numpy_1612953165809/work
+packaging==20.9
+pathy==0.3.6
+preshed==3.0.5
+pycparser @ file:///tmp/build/80754af9/pycparser_1594388511720/work
+pydantic==1.7.3
+pyparsing==2.4.7
+requests==2.25.1
+scipy==1.6.0
+sentencepiece==0.1.95
+six @ file:///C:/ci/six_1605187374963/work
+smart-open==3.0.0
+spacy==3.0.1
+spacy-legacy==3.0.1
+srsly==2.4.0
+thinc==8.0.1
+torch @ file:///C:/ci/pytorch_1596373105144/work
+tqdm==4.56.2
+typer==0.3.2
+urllib3==1.26.3
+wasabi==0.8.2
+wincertstore==0.2
