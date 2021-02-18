@@ -3,6 +3,7 @@ import os
 
 # https://stackoverflow.com/questions/1912434/how-do-i-parse-xml-in-python
 # https://docs.python.org/3/library/xml.etree.elementtree.html
+# corpus = xml.etree.ElementTree.fromstring(all_of_it, parser=xml.etree.ElementTree.XMLParser(encoding='utf-8')).text
 
 def wikiCreateJapEnglishPairList() -> list:
     listPairs = dict()
