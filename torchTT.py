@@ -10,19 +10,19 @@ from encDecoderLSTM import EncoderRNN, DecoderRNN
 # python -m spacy download ja_core_news_sm
 # python -m spacy download en_core_web_sm
 
-spacy_japanese = spacy.load("ja_core_news_sm")
+# https://towardsdatascience.com/understanding-encoder-decoder-sequence-to-sequence-model-679e04af4346
+
+spacy_japanese = spacy.load("ja_core_news_md")
 spacy_english = spacy.load("en_core_web_sm")
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def tokenize_japanese(text):
-  #return [token.text for token in spacy_japanese.tokenizer(text)]
-  return text.split(" ")
+  return [token.text for token in spacy_japanese.tokenizer(text)]
 
 def tokenize_english(text):
-  #return [token.text for token in spacy_english.tokenizer(text)]
-  return text.split(" ")
+  return [token.text for token in spacy_english.tokenizer(text)]
 
 
 # sample_text = "I love machine learning"
@@ -55,8 +55,8 @@ fields = [
 # load the dataset in json format
 train_ds, valid_ds = TabularDataset.splits(
    path = 'datafiles',
-   train = 'train_de-eng.tsv',
-   validation = 'test.tsv',
+   train = 'standford_train4.tsv',
+   validation = 'standford_test4.tsv',
    format = 'tsv',
    fields = fields,
    skip_header = False
@@ -195,7 +195,7 @@ def translate_sentence(model, sentence, japanese, english, device, max_length=50
 
 
 num_epochs = 100
-sentence1 = "Ich will dich eine Frage fragen"
+sentence1 = "そうしてアサンガは言ったよし分かった"
 
 for epoch in range(num_epochs):
     print("Epoch - {} / {}".format(epoch + 1, num_epochs))
