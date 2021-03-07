@@ -286,7 +286,7 @@ def indexesFromJAPSentence(lang, sentence):
 
     listIndex = list()
     for word in tokenized:
-        listIndex.append(lang.word2index.get(word, -1)) #defaults to -1 if can't find
+        listIndex.append(lang.word2index.get(word, -1)) #defaults to -1 if can't find, this one doesn't work since its storing UniDict object in worddict, never finds matches so always gets -1 output
     return listIndex
     #return [lang.word2index[word] for word in tokenized]
 

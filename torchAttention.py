@@ -281,12 +281,14 @@ def tensorFromSentence(lang, sentence):
 def indexesFromJAPSentence(lang, sentence):
     tokenized = spacy_japanese.tokenizer(sentence)
     tmp = list(tokenized)
+    # print(tmp)
     # print("届い" == "届い")
-    # print(lang.word2index.get("よ", "ap"))
+    # print(lang.word2index.get("よ".encode("utf-8"), "ap"))
     # print("よ" in lang.word2index)
+    # print("よ".encode("utf-8") in lang.word2index)
 
     listIndex = list()
-    for word in tokenized:
+    for word in tmp:
         listIndex.append(lang.word2index.get(str(word).encode("utf-8"), -1)) #defaults to -1 if can't find
     return listIndex
     #return [lang.word2index[word] for word in tokenized]
