@@ -278,6 +278,7 @@ def tensorFromSentence(lang, sentence):
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
 
+# uses spacy to tokenize
 def indexesFromJAPSentence(lang, sentence):
     tokenized = spacy_japanese.tokenizer(sentence)
     tmp = list(tokenized)
@@ -520,7 +521,7 @@ hidden_size = 256
 encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
 
-trainIters(encoder1, attn_decoder1, 10000, print_every=5)
+trainIters(encoder1, attn_decoder1, 10000, print_every=10)
 
 ######################################################################
 #

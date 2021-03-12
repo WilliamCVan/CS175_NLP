@@ -108,7 +108,7 @@ def readLangs(lang1, lang2, reverse=False):
 # earlier).
 #
 
-MAX_LENGTH = 10
+MAX_LENGTH = 15
 
 eng_prefixes = (
     "i am ", "i m ",
@@ -141,7 +141,7 @@ def filterPairs(pairs):
 def prepareData(lang1, lang2, reverse=False):
     input_lang, output_lang, pairs = readLangs(lang1, lang2, reverse)
     print("Read %s sentence pairs" % len(pairs))
-    #pairs = filterPairs(pairs)
+    pairs = filterPairs(pairs)
     print("Trimmed to %s sentence pairs" % len(pairs))
     print("Counting words...")
     for pair in pairs:
@@ -276,7 +276,7 @@ def tensorFromSentence(lang, sentence):
     indexes.append(EOS_token)
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
-
+# uses fugashi to tokenize
 def indexesFromJAPSentence(lang, sentence):
     tokenized = japTagger(sentence)
     tmp = list(tokenized)

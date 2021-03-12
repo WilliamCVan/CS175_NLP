@@ -71,18 +71,39 @@ def get_training_and_testing_sets():
 #get_training_and_testing_sets()
 
 
-# import re
-# pattern = re.compile('[^A-Za-z0-9 ]+')
-# bcd = pattern.sub('', "i can't draw mr.")
-# print(bcd)
-#
-# print(''.join([i for i in "き起こそう,とする事(象)が散見されています" if i.isalpha()])) # works for japanese
+import re
+def sanitizeStandford():
+    pattern = re.compile('[^A-Za-z0-9 ]+')
+    bcd = pattern.sub('', "i can't draw mr.")
+    print(bcd)
 
-# with open("./datafiles/standford_raw_clean", mode="a", encoding="utf-8") as file_write:
-#     with open("./datafiles/standford_raw", mode="r", encoding="utf-8") as file_read:
-#         for line in file_read:
-#             eng, jap = line.split("\t")
-#             eng = pattern.sub('', eng)
-#             jap = ''.join([i for i in jap if i.isalpha()])
-#             file_write.write(eng + "\t" + jap + "\n")
+    print(''.join([i for i in "き起こそう,とする事(象)が散見されています" if i.isalpha()])) # works for japanese
 
+    with open("./datafiles/standford_raw_clean", mode="a", encoding="utf-8") as file_write:
+        with open("./datafiles/standford_raw", mode="r", encoding="utf-8") as file_read:
+            for line in file_read:
+                eng, jap = line.split("\t")
+                eng = pattern.sub('', eng)
+                jap = ''.join([i for i in jap if i.isalpha()])
+                file_write.write(eng + "\t" + jap + "\n")
+
+#sanitizeStandford()
+
+import unicodedata
+# unicodedata.normalize('NFKD', title).encode('ascii', 'ignore')
+# 'Kluft skrams infor pa federal electoral groe'
+def sanitizeSpanish():
+    tokens = list()
+    pattern = re.compile('[^A-Za-z0-9 ]+')
+    # bcd = pattern.sub('', "i can't draw mr.")
+
+    with open("datafiles/eng_spa.txt", mode="a", encoding="utf-8") as file_write:
+        with open("datafiles/spa.txt", mode="r", encoding="utf-8") as file_in:
+            for line in file_in:
+                listToken = line.split("\t")
+                eng = pattern.sub('', listToken[0])
+                abc = unicodedata.normalize('NFKD', listToken[1])
+                spanish = pattern.sub('', abc)
+                file_write.write(eng + "\t" + str(spanish) + "\n")
+
+# sanitizeSpanish()
