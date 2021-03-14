@@ -6,7 +6,7 @@
 
 <u>Datasets used:</u>
 1. https://www.kaggle.com/team-ai/japaneseenglish-bilingual-corpus
-2. https://nlp.stanford.edu/projects/jesc/ 
+2. https://nlp.stanford.edu/projects/jesc/ (Processed data file needed for project.ipynb available here: https://drive.google.com/u/0/uc?id=19_jCHSv3AYqFOiXdzi1MSwaYNfIfQJSh&export=download)
 
 Folder: src file descriptions
 1. encDecoderGRU.py - pretrained vector embeddings for encoder and decoder
