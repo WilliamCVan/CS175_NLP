@@ -8,9 +8,6 @@
 1. https://www.kaggle.com/team-ai/japaneseenglish-bilingual-corpus
 2. https://nlp.stanford.edu/projects/jesc/ 
 
-<u>Project layout:</u>  
-![folder layout](./directoryLayout.PNG)
-
 Folder: src file descriptions
 1. encDecoderGRU.py - pretrained vector embeddings for encoder and decoder
 2. encDecoderLSTM.py - basic sequence to sequence model using torchText for embedding layer
