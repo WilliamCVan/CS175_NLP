@@ -47,7 +47,10 @@ def wikiCreateJapEnglishPairList() -> list:
             # write pairs out to file using <tab> as delimiter to match "standford_raw" dataset
             with open("./datafiles/wikipedia_raw", mode="a", encoding="utf-8") as file_in:
                 for eng, jap in listPairs.items():
-                    file_in.write(eng + "\t" + jap + "\n")
+                    if (eng and jap):
+                        if ("(" in eng and ")" in eng) and not ("(" in jap and ")" in jap):
+                            continue
+                        file_in.write(eng + "\t" + jap + "\n")
         except:
             pass
 

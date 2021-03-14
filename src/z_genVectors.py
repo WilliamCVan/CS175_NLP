@@ -1,19 +1,18 @@
 import fugashi
 import gensim
 import nltk
+import seaborn as sns
 from gensim.models import Word2Vec
 from gensim.models.word2vec import LineSentence
+import time
 
-SOS_token = "SOS"
-EOS_token = "EOS"
-
-# pip install fugashi[unidic-lite]
-# pip install nltk
+SOS_token = "<SOS>"
+EOS_token = "<EOS>"
 
 # generates sentences for gensim's word2vec encoder
 # uses fugashi to tokenize japanese text
 class weebCorpus:
-    filename = "";
+    filename = ""
     tagger = fugashi.Tagger()
     language = "japanese"
     
@@ -36,18 +35,19 @@ class weebCorpus:
 def genVectors(corpus, language = "japanese"):
         sentences = weebCorpus(corpus, language)
         model = Word2Vec(sentences=sentences,
-                         size=50,
+                         size=300,
                          window=5,
-                         workers=4,
-                         min_count=1,
+                         workers=12,
+                         min_count=5,
                          iter=5)
         
         model.save("./" + language + "vectors.model")
-        model.wv.save_word2vec_format("./" + language + "vectors_readable.txt", binary=False)
+        # model.wv.save_word2vec_format("./" + language + "vectors_readable.txt", binary=False)
             
 if __name__ == "__main__": 
-    genVectors("./datafiles/standford_raw", language="japanese")
-    genVectors("./datafiles/standford_raw", language="english")
+    start = time.time()
+    genVectors("./datafiles/standford_raw_clean", language="japanese")
+    genVectors("./datafiles/standford_raw_clean", language="english")
     print("most similar to 時代: ")
     w1 = ["時代"]
     model = gensim.models.Word2Vec.load("japanesevectors.model")
@@ -60,3 +60,4 @@ if __name__ == "__main__":
     model = gensim.models.Word2Vec.load("englishvectors.model")
     for thing in model.wv.most_similar(positive=w1,topn=6):
         print (thing[0])
+    print(time.time() - start)

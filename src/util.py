@@ -1,6 +1,5 @@
 import fugashi
 from gensim.models import Word2Vec
-from gensim.models.word2vec import LineSentence
 
 # generates sentences for gensim's word2vec encoder
 # uses fugashi to tokenize japanese text
@@ -49,28 +48,6 @@ def tokenizeJapanese(filename) -> list:
     return tokens
 # processJapEnglishPairList("./datafiles/wikipedia_raw")
 
-
-from math import floor
-
-def get_training_and_testing_sets():
-    split = 0.7
-    with open("./datafiles/standford_test3.tsv", mode="r", encoding="utf-8") as file_in:
-        total_lines = file_in.readlines()
-
-        split_index = floor(len(total_lines) * split)
-        training = total_lines[:split_index]
-        testing = total_lines[split_index:]
-    #return training, testing
-
-    with open("./datafiles/standford_train4.tsv", mode="w", encoding="utf-8") as file_train:
-        file_train.writelines(training)
-
-    with open("./datafiles/standford_test4.tsv", mode="w", encoding="utf-8") as file_train:
-        file_train.writelines(testing)
-
-#get_training_and_testing_sets()
-
-
 import re
 def sanitizeStandford():
     pattern = re.compile('[^A-Za-z0-9 ]+')
@@ -89,21 +66,29 @@ def sanitizeStandford():
 
 #sanitizeStandford()
 
-import unicodedata
-# unicodedata.normalize('NFKD', title).encode('ascii', 'ignore')
-# 'Kluft skrams infor pa federal electoral groe'
-def sanitizeSpanish():
-    tokens = list()
-    pattern = re.compile('[^A-Za-z0-9 ]+')
-    # bcd = pattern.sub('', "i can't draw mr.")
 
-    with open("datafiles/eng_spa.txt", mode="a", encoding="utf-8") as file_write:
-        with open("datafiles/spa.txt", mode="r", encoding="utf-8") as file_in:
-            for line in file_in:
-                listToken = line.split("\t")
-                eng = pattern.sub('', listToken[0])
-                abc = unicodedata.normalize('NFKD', listToken[1])
-                spanish = pattern.sub('', abc)
-                file_write.write(eng + "\t" + str(spanish) + "\n")
+from math import floor
 
-# sanitizeSpanish()
+def get_training_and_testing_sets():
+    split = [0.7, 0.2, 0.1]
+    assert(1 - sum(split) < 0.001)
+    with open("./datafiles/standford_raw_clean", mode="r", encoding="utf-8") as file_in:
+        total_lines = file_in.readlines()
+
+        split_index_1 = floor(len(total_lines) * split[0])
+        split_index_2 = floor(len(total_lines) * (split[0] + split[1]))
+        training = total_lines[:split_index_1]
+        validating = total_lines[split_index_1:split_index_2]
+        testing = total_lines[split_index_2:]
+    #return training, testing
+
+    with open("./datafiles/standford_train.tsv", mode="w", encoding="utf-8") as file_train:
+        file_train.writelines(training)
+
+    with open("./datafiles/standford_valid.tsv", mode="w", encoding="utf-8") as file_train:
+        file_train.writelines(validating)
+
+    with open("./datafiles/standford_test.tsv", mode="w", encoding="utf-8") as file_train:
+        file_train.writelines(testing)
+
+# get_training_and_testing_sets()
