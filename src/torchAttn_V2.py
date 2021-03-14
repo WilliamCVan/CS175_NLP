@@ -53,13 +53,13 @@ class Lang:
             else:
                 self.word2count[word] += 1
         else:
-            if word not in self.word2index: #for japanese
-                self.word2index[word] = self.n_words
-                self.word2count[word] = 1
-                self.index2word[self.n_words] = word
+            if str(word).encode("utf-8") not in self.word2index: #for japanese
+                self.word2index[str(word).encode("utf-8")] = self.n_words
+                self.word2count[str(word).encode("utf-8")] = 1
+                self.index2word[self.n_words] = str(word).encode("utf-8")
                 self.n_words += 1
             else:
-                self.word2count[word] += 1
+                self.word2count[str(word).encode("utf-8")] += 1
 
 
 # Lowercase, trim, and remove non-letter characters
@@ -108,7 +108,7 @@ def readLangs(lang1, lang2, reverse=False):
 # earlier).
 #
 
-MAX_LENGTH = 10
+MAX_LENGTH = 15
 
 eng_prefixes = (
     "i am ", "i m ",
@@ -141,7 +141,7 @@ def filterPairs(pairs):
 def prepareData(lang1, lang2, reverse=False):
     input_lang, output_lang, pairs = readLangs(lang1, lang2, reverse)
     print("Read %s sentence pairs" % len(pairs))
-    #pairs = filterPairs(pairs)
+    pairs = filterPairs(pairs)
     print("Trimmed to %s sentence pairs" % len(pairs))
     print("Counting words...")
     for pair in pairs:
@@ -276,7 +276,7 @@ def tensorFromSentence(lang, sentence):
     indexes.append(EOS_token)
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
-
+# uses fugashi to tokenize
 def indexesFromJAPSentence(lang, sentence):
     tokenized = japTagger(sentence)
     tmp = list(tokenized)
@@ -286,7 +286,7 @@ def indexesFromJAPSentence(lang, sentence):
 
     listIndex = list()
     for word in tokenized:
-        listIndex.append(lang.word2index.get(word, -1)) #defaults to -1 if can't find, this one doesn't work since its storing UniDict object in worddict, never finds matches so always gets -1 output
+        listIndex.append(lang.word2index.get(str(word).encode("utf-8"), -1)) #defaults to -1 if can't find
     return listIndex
     #return [lang.word2index[word] for word in tokenized]
 
@@ -505,7 +505,7 @@ def evaluateRandomly(encoder, decoder, n=10):
 # Remember that the input sentences were heavily filtered. For this small
 # dataset we can use relatively small networks of 256 hidden nodes and a
 # single GRU layer. After about 40 minutes on a MacBook CPU we'll get some
-# reasonable results.
+# reasonable results_model_prediction.
 #
 # .. Note::
 #    If you run this notebook you can train, interrupt the kernel,
@@ -539,10 +539,12 @@ evaluateRandomly(encoder1, attn_decoder1)
 # output steps:
 #
 
-output_words, attentions = evaluate(encoder1, attn_decoder1, "本当に良くやった")
+output_words, attentions = evaluate(
+    encoder1, attn_decoder1, "本当に良くやった")
 
 def evaluateAndShowAttention(input_sentence):
-    output_words, attentions = evaluate(encoder1, attn_decoder1, input_sentence)
+    output_words, attentions = evaluate(
+        encoder1, attn_decoder1, input_sentence)
     print('input =', input_sentence)
     print('output =', ' '.join(output_words))
 
@@ -569,7 +571,7 @@ evaluateAndShowAttention("本当に良くやった")
 # -  Replace the embeddings with pre-trained word embeddings such as word2vec or
 #    GloVe
 # -  Try with more layers, more hidden units, and more sentences. Compare
-#    the training time and results.
+#    the training time and results_model_prediction.
 # -  If you use a translation file where pairs have two of the same phrase
 #    (``I am test \t I am test``), you can use this as an autoencoder. Try
 #    this:

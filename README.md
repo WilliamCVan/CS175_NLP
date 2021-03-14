@@ -1,4 +1,8 @@
-# CS175_NLP
+# CS175_NLP: TranslationWeeb
+
+<u>Completed Trained Model Link:</u>
+
+-https://drive.google.com/u/1/uc?id=1MkRyroGmtHM75ZdaTgJ4bScemO75qAST&export=download
 
 <u>Datasets used:</u>
 1. https://www.kaggle.com/team-ai/japaneseenglish-bilingual-corpus
@@ -7,12 +11,16 @@
 <u>Project layout:</u>  
 ![folder layout](./directoryLayout.PNG)
 
-<u>Directions:</u>
-1. Run genFileWikipedia.py to generate wikipedia_raw (jap, eng pairs)
-2. parseTokenizeFiles.py for preprocessing (nltk, text sanitization)
-3. util.py functions to tokenize japanese, add <EOS>, <SOS> tokens
-
-<u>Colab Notebooks Links:</u>
-
-1. Torchtext: https://colab.research.google.com/drive/1eTLcyfTZK4CfrZL4372I72DuXHclYyot?usp=sharing#scrollTo=N79gPKtJQMzi
-2. Tensorflow: https://colab.research.google.com/drive/1JgxnnqolCddBtlJ1fSMIdhB4bW_MMW64
+Folder: src file descriptions
+1. encDecoderGRU.py - pretrained vector embeddings for encoder and decoder
+2. encDecoderLSTM.py - basic sequence to sequence model using torchText for embedding layer
+3. genFileWikipedia.py - generate wikipedia_raw (jap, eng pairs) 
+4. torchAttn_v1.py - Pytorch tutorial, spacy for japanese tokenization, string encoded japanese for model inputs, attention layer
+5. torchAttn_v2.py - Pytorch tutorial, Fugashi for japanese tokenization, string encoded japanese for model inputs, attention layer
+6. torchAttn_v3.py - Pytorch tutorial, Fugashi for japanese tokenization, fed Unidic objects into langauge dictionary, attention layer
+7. torchTT.py - basic seq2seq model using torchText for embedding layer and spacy for tokenization
+8. util.py - text preprocessing of corpus files generating final clean corpus files (nltk, text sanitization)
+9. z_genPair.py - created the pickle file with <SOS> and <EOS> tokens to be loaded by model
+10. z_genVectors.py - gensim vector embedding trained models
+11. z_seq2seq_translation_tutorial.py - pytorch tutorial that was modified to translate japanese to english using attention
+12. z_translateWEEB.py - Pytorch tutorial, using pretrained word embeddings (gensim) to translate japanese to english

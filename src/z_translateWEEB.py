@@ -397,7 +397,7 @@ class DecoderRNN(nn.Module):
 
 
 ######################################################################
-# I encourage you to train and observe the results of this model, but to
+# I encourage you to train and observe the results_model_prediction of this model, but to
 # save space we'll be going straight for the gold and introducing the
 # Attention Mechanism.
 #
@@ -660,7 +660,7 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
 
 
 ######################################################################
-# Plotting results
+# Plotting results_model_prediction
 # ----------------
 #
 # Plotting is done with matplotlib, using the array of loss values
@@ -757,7 +757,7 @@ def evaluateRandomly(encoder, decoder, n=10):
 # Remember that the input sentences were heavily filtered. For this small
 # dataset we can use relatively small networks of 256 hidden nodes and a
 # single GRU layer. After about 40 minutes on a MacBook CPU we'll get some
-# reasonable results.
+# reasonable results_model_prediction.
 #
 # .. Note::
 #    If you run this notebook you can train, interrupt the kernel,
@@ -859,7 +859,7 @@ def evaluateAndShowAttention(input_sentence):
 # -  Replace the embeddings with pre-trained word embeddings such as word2vec or
 #    GloVe
 # -  Try with more layers, more hidden units, and more sentences. Compare
-#    the training time and results.
+#    the training time and results_model_prediction.
 # -  If you use a translation file where pairs have two of the same phrase
 #    (``I am test \t I am test``), you can use this as an autoencoder. Try
 #    this:

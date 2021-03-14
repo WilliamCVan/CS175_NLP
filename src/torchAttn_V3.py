@@ -24,9 +24,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 SOS_token = 0
 EOS_token = 1
-
-import spacy
-spacy_japanese = spacy.load("ja_core_news_md")
+import fugashi
+japTagger = fugashi.Tagger()
 
 class Lang:
     def __init__(self, name):
@@ -41,11 +40,11 @@ class Lang:
             self.addWord(word)
 
     def addJapaneseSentence(self, sentence):
-        for word in spacy_japanese.tokenizer(sentence):
+        for word in japTagger(sentence):
             self.addWord(word, True)
 
     def addWord(self, word, boolIsJap=False):
-        if (boolIsJap == False):  # for english
+        if(boolIsJap == False): # for english
             if word not in self.word2index:
                 self.word2index[word] = self.n_words
                 self.word2count[word] = 1
@@ -54,13 +53,13 @@ class Lang:
             else:
                 self.word2count[word] += 1
         else:
-            if str(word).encode("utf-8") not in self.word2index:  # for japanese
-                self.word2index[str(word).encode("utf-8")] = self.n_words
-                self.word2count[str(word).encode("utf-8")] = 1
-                self.index2word[self.n_words] = str(word).encode("utf-8")
+            if word not in self.word2index: #for japanese
+                self.word2index[word] = self.n_words
+                self.word2count[word] = 1
+                self.index2word[self.n_words] = word
                 self.n_words += 1
             else:
-                self.word2count[str(word).encode("utf-8")] += 1
+                self.word2count[word] += 1
 
 
 # Lowercase, trim, and remove non-letter characters
@@ -135,9 +134,6 @@ def filterPairs(pairs):
 # -  Read text file and split into lines, split lines into pairs
 # -  Normalize text, filter by length and content
 # -  Make word lists from sentences in pairs
-#
-
-# python -m spacy download ja_core_news_md   ** <=== RUN THIS
 
 def prepareData(lang1, lang2, reverse=False):
     input_lang, output_lang, pairs = readLangs(lang1, lang2, reverse)
@@ -278,19 +274,16 @@ def tensorFromSentence(lang, sentence):
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
 
-# uses spacy to tokenize
 def indexesFromJAPSentence(lang, sentence):
-    tokenized = spacy_japanese.tokenizer(sentence)
+    tokenized = japTagger(sentence)
     tmp = list(tokenized)
-    # print(tmp)
     # print("届い" == "届い")
-    # print(lang.word2index.get("よ".encode("utf-8"), "ap"))
+    # print(lang.word2index.get("よ", "ap"))
     # print("よ" in lang.word2index)
-    # print("よ".encode("utf-8") in lang.word2index)
 
     listIndex = list()
-    for word in tmp:
-        listIndex.append(lang.word2index.get(str(word).encode("utf-8"), -1)) #defaults to -1 if can't find
+    for word in tokenized:
+        listIndex.append(lang.word2index.get(word, -1)) #defaults to -1 if can't find, this one doesn't work since its storing UniDict object in worddict, never finds matches so always gets -1 output
     return listIndex
     #return [lang.word2index[word] for word in tokenized]
 
@@ -509,7 +502,7 @@ def evaluateRandomly(encoder, decoder, n=10):
 # Remember that the input sentences were heavily filtered. For this small
 # dataset we can use relatively small networks of 256 hidden nodes and a
 # single GRU layer. After about 40 minutes on a MacBook CPU we'll get some
-# reasonable results.
+# reasonable results_model_prediction.
 #
 # .. Note::
 #    If you run this notebook you can train, interrupt the kernel,
@@ -521,7 +514,7 @@ hidden_size = 256
 encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
 
-trainIters(encoder1, attn_decoder1, 10000, print_every=10)
+trainIters(encoder1, attn_decoder1, 10000, print_every=5)
 
 ######################################################################
 #
@@ -543,12 +536,10 @@ evaluateRandomly(encoder1, attn_decoder1)
 # output steps:
 #
 
-output_words, attentions = evaluate(
-    encoder1, attn_decoder1, "本当に良くやった")
+output_words, attentions = evaluate(encoder1, attn_decoder1, "本当に良くやった")
 
 def evaluateAndShowAttention(input_sentence):
-    output_words, attentions = evaluate(
-        encoder1, attn_decoder1, input_sentence)
+    output_words, attentions = evaluate(encoder1, attn_decoder1, input_sentence)
     print('input =', input_sentence)
     print('output =', ' '.join(output_words))
 
@@ -575,7 +566,7 @@ evaluateAndShowAttention("本当に良くやった")
 # -  Replace the embeddings with pre-trained word embeddings such as word2vec or
 #    GloVe
 # -  Try with more layers, more hidden units, and more sentences. Compare
-#    the training time and results.
+#    the training time and results_model_prediction.
 # -  If you use a translation file where pairs have two of the same phrase
 #    (``I am test \t I am test``), you can use this as an autoencoder. Try
 #    this:
