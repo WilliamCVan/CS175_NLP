@@ -28,7 +28,7 @@ share/python-wheels/
 MANIFEST
 .idea/
 .data/
-datafiles/
+datafiles/standford_raw_clean
 training_ckpt_seq2seq_att/
 
 # PyInstaller

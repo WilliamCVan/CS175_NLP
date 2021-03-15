@@ -4,6 +4,7 @@ import torch.optim as optim
 from torchtext.data import Field, BucketIterator, TabularDataset
 import spacy
 import random
+import math
 from torchtext.data.metrics import bleu_score
 from encDecoderLSTM import EncoderRNN, DecoderRNN
 
@@ -12,11 +13,15 @@ from encDecoderLSTM import EncoderRNN, DecoderRNN
 
 # https://towardsdatascience.com/understanding-encoder-decoder-sequence-to-sequence-model-679e04af4346
 
-spacy_japanese = spacy.load("ja_core_news_md")
+SOS_token = "<SOS>"
+EOS_token = "<EOS>"
+
+spacy_japanese = spacy.load("ja_core_news_sm")
 spacy_english = spacy.load("en_core_web_sm")
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.cuda.empty_cache()
 
 def tokenize_japanese(text):
   return [token.text for token in spacy_japanese.tokenizer(text)]
@@ -36,13 +41,13 @@ def tokenize_english(text):
 
 JAPANESE = Field(tokenize=tokenize_japanese,
                lower=True,
-               init_token="<sos>",
-               eos_token="<eos>")
+               init_token=SOS_token,
+               eos_token=EOS_token)
 
 ENGLISH = Field(tokenize=tokenize_english,
                lower=True,
-               init_token="<sos>",
-               eos_token="<eos>")
+               init_token=SOS_token,
+               eos_token=EOS_token)
 
 
 # https://dzlab.github.io/dltips/en/pytorch/torchtext-datasets/
@@ -52,11 +57,12 @@ fields = [
   ('jap', JAPANESE)
 ]
 
-# load the dataset in json format
-train_ds, valid_ds = TabularDataset.splits(
+# load the dataset in tsv format
+train_ds, valid_ds, test_ds = TabularDataset.splits(
    path = 'datafiles',
-   train = 'standford_train4.tsv',
-   validation = 'standford_test4.tsv',
+   train = 'standford_train.tsv',
+   validation = 'standford_valid.tsv',
+   test = 'standford_test.tsv',
    format = 'tsv',
    fields = fields,
    skip_header = False
@@ -72,9 +78,8 @@ print(train_ds[5].__dict__.keys())
 print(train_ds[5].__dict__.values())
 print()
 
-
-JAPANESE.build_vocab(train_ds, max_size=10000, min_freq=3)
-ENGLISH.build_vocab(train_ds, max_size=10000, min_freq=3)
+JAPANESE.build_vocab(train_ds, min_freq=3)
+ENGLISH.build_vocab(train_ds, min_freq=3)
 
 print(f"Unique tokens in source (japanese) vocabulary: {len(JAPANESE.vocab)}")
 print(f"Unique tokens in target (english) vocabulary: {len(ENGLISH.vocab)}")
@@ -94,7 +99,9 @@ train_iterator, valid_iterator = BucketIterator.splits((train_ds, valid_ds),
 input_size_encoder = len(JAPANESE.vocab)
 embedding_size = 300
 hidden_size = 1024
-encoder_lstm = EncoderRNN(input_size_encoder, embedding_size,hidden_size).to(device)
+num_layers = 2
+dropout = 0.5
+encoder_lstm = EncoderRNN(embedding_size, hidden_size, num_layers, dropout).to(device)
 #encoder_lstm = EncoderRNN(input_size_encoder, hidden_size).to(device)
 print(encoder_lstm)
 # EncoderRNN(
@@ -106,7 +113,7 @@ print(encoder_lstm)
 
 input_size_decoder = len(ENGLISH.vocab)
 output_size = len(ENGLISH.vocab)
-decoder_lstm = DecoderRNN(input_size_decoder, embedding_size, hidden_size, output_size).to(device)
+decoder_lstm = DecoderRNN(embedding_size, hidden_size, output_size, num_layers, dropout).to(device)
 #decoder_lstm = DecoderRNN(hidden_size, output_size).to(device)
 print(decoder_lstm)
 # DecoderRNN(
@@ -162,11 +169,11 @@ print(model)
 
 
 def translate_sentence(model, sentence, japanese, english, device, max_length=50):
+    tokens = [japanese.init_token]
     if type(sentence) == str:
-        tokens = [token.text.lower() for token in spacy_japanese(sentence)]
+        tokens.extend([token.text.lower() for token in spacy_japanese(sentence)])
     else:
-        tokens = [token.lower() for token in sentence]
-    tokens.insert(0, japanese.init_token)
+        tokens.extend([token.lower() for token in sentence])
     tokens.append(japanese.eos_token)
     text_to_indices = [japanese.vocab.stoi[token] for token in tokens]
     sentence_tensor = torch.LongTensor(text_to_indices).unsqueeze(1).to(device)
@@ -175,7 +182,7 @@ def translate_sentence(model, sentence, japanese, english, device, max_length=50
     with torch.no_grad():
         hidden, cell = model.Encoder_LSTM(sentence_tensor)
 
-    outputs = [english.vocab.stoi["<sos>"]]
+    outputs = [english.vocab.stoi[SOS_token]]
 
     for _ in range(max_length):
         previous_word = torch.LongTensor([outputs[-1]]).to(device)
@@ -184,25 +191,49 @@ def translate_sentence(model, sentence, japanese, english, device, max_length=50
             output, hidden, cell = model.Decoder_LSTM(previous_word, hidden, cell)
             best_guess = output.argmax(1).item()
 
-        outputs.append(best_guess)
-
         # Model predicts it's the end of the sentence
-        if output.argmax(1).item() == english.vocab.stoi["<eos>"]:
+        if output.argmax(1).item() == english.vocab.stoi[EOS_token]:
             break
+
+        outputs.append(best_guess)
 
     translated_sentence = [english.vocab.itos[idx] for idx in outputs]
     return translated_sentence[1:]
 
+def bleu(data, model, japanese, english, device):
+    targets = []
+    outputs = []
 
-num_epochs = 100
-sentence1 = "そうしてアサンガは言ったよし分かった"
+    for example in data:
+        src = vars(example)["jap"]
+        trg = vars(example)["eng"]
+        
+        prediction = translate_sentence(model, src, japanese, english, device)
+        prediction = prediction[:-1]  # remove <eos> token
+        targets.append([trg])
+        outputs.append(prediction)
+
+    return bleu_score(outputs, targets)
+
+def checkpoint_and_save(model, best_loss, epoch, optimizer):
+    print('saving')
+    print()
+    state = {'model': model,'best_loss': best_loss,'epoch': epoch,'rng_state': torch.get_rng_state(), 'optimizer': optimizer.state_dict(),}
+    torch.save(state, 'checkpoint')
+    torch.save(model.state_dict(),'checkpoint-sd')
+
+num_epochs = 200
+epoch_loss = 0.0
+best_loss = math.inf
+best_epoch = -math.inf
+sentence1 = "今お前などに興味はない。" # i am not interested in you now.
+# sentence1 = "ありがとよじいさん!" # thank you grandpa/old man!
 
 for epoch in range(num_epochs):
     print("Epoch - {} / {}".format(epoch + 1, num_epochs))
     model.eval()
-    translated_sentence1 = translate_sentence(model, sentence1, JAPANESE, ENGLISH, device, max_length=50)
+    translated_sentence1 = translate_sentence(model, sentence1, JAPANESE, ENGLISH, device, 50)
     print(f"Translated example sentence 1: \n {translated_sentence1}\n")
-    epoch_loss = 0.0
 
     model.train(True)
     for batch_idx, batch in enumerate(train_iterator):
@@ -223,9 +254,26 @@ for epoch in range(num_epochs):
         # Calculate the gradients for weights & biases using back-propagation
         loss.backward()
 
+        # Clip the gradient value if it exceeds > 1
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
+
         # Update the weights values using the gradients we calculated using bp
         optimizer.step()
         step += 1
         epoch_loss += loss.item()
+    
+    if loss.item() < best_loss:
+        best_loss = loss.item()
+        best_epoch = epoch
+        checkpoint_and_save(model, best_loss, epoch, optimizer) 
+    elif (epoch - best_epoch) >= 10:
+        print("no improvement in 10 epochs, break")
+        break
 
-    print(epoch_loss / len(train_iterator))
+    print("Epoch_Loss - {}".format(loss.item()))
+
+print(epoch_loss / len(train_iterator))
+
+score = bleu(test_ds[:100], model, JAPANESE, ENGLISH, device)
+print(f'BLEU score: {score*100:.2f}')
+

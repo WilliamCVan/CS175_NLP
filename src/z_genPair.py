@@ -2,14 +2,14 @@ import fugashi, nltk, pickle
 
 tagger = fugashi.Tagger()
 
-SOS_token = "SOS"
-EOS_token = "EOS"
+SOS_token = "<SOS>"
+EOS_token = "<EOS>"
 
 
 def genPairs():
     pairs = list()
 
-    with open("./datafiles/standford_raw", mode="r", encoding="utf-8") as file_in:
+    with open("./datafiles/standford_raw_clean", mode="r", encoding="utf-8") as file_in:
         for line in file_in:
             jap = [SOS_token] + [word.surface for word in tagger(line.split("\t")[1])]
             eng = [SOS_token] + nltk.word_tokenize(line.split("\t")[0])
