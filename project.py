@@ -17,7 +17,7 @@ from keras.preprocessing.sequence import pad_sequences
 
 root_folder='.'
 data_folder_name='datafiles'
-train_filename='standford_wiki'
+train_filename='standford_raw'
 
 DATA_PATH = os.path.abspath(os.path.join(root_folder, data_folder_name))
 train_filenamepath = os.path.abspath(os.path.join(DATA_PATH, train_filename))
