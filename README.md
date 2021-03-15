@@ -1,6 +1,6 @@
 # CS175_NLP: TranslationWeeb
 
-<u>Completed Trained Model Link:</u>
+<u>Completed Trained Model (323 MB):</u>
 
 -https://drive.google.com/u/1/uc?id=1MkRyroGmtHM75ZdaTgJ4bScemO75qAST&export=download
 
@@ -8,10 +8,11 @@
 1. https://www.kaggle.com/team-ai/japaneseenglish-bilingual-corpus
 2. https://nlp.stanford.edu/projects/jesc/ 
 
-<u>Project layout:</u>  
-![folder layout](./directoryLayout.PNG)
+<u>Final submission:</u>
 
-Folder: src file descriptions
+project.py - seq2seq model with attention using Keras
+
+<u>Folder: src file descriptions</u>
 1. encDecoderGRU.py - pretrained vector embeddings for encoder and decoder
 2. encDecoderLSTM.py - basic sequence to sequence model using torchText for embedding layer
 3. genFileWikipedia.py - generate wikipedia_raw (jap, eng pairs) 
