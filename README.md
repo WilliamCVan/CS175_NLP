@@ -1,5 +1,7 @@
 # CS175_NLP: TranslationWeeb
 
+Final Report: https://docs.google.com/document/d/1kv8xii1NR8fFiUgijCGUAp0I_tkiU4294Vrt3HfXN68/edit?usp=sharing
+
 <u>Completed Trained Model (323 MB):</u>
 
 -https://drive.google.com/u/1/uc?id=1MkRyroGmtHM75ZdaTgJ4bScemO75qAST&export=download
